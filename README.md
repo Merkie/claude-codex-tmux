@@ -1,5 +1,13 @@
 # claude-codex-tmux
 
+> **CANONICAL DOCUMENT: [`SKILL.md`](./SKILL.md).** Give that file to Claude, Codex, or another
+> agent. It contains the corrected, controlled workflow. This README is retained as earlier
+> background and must not override `SKILL.md`.
+>
+> **NEVER use `claude -p`, `claude --print`, `codex exec`, its `codex e` alias, or
+> `codex exec review` for this workflow. It always uses the real interactive Claude Code or
+> Codex CLI inside tmux.**
+
 Control **Claude Code** and **OpenAI Codex CLI** sessions inside tmux, so one agent can drive
 the other — code review, adversarial plan critique, second opinions — then close the session.
 
@@ -23,12 +31,12 @@ Codex CLI v0.146.0, macOS). Audience: Claude, Codex, or any agent that can run s
 4. **Close the session** as soon as you have the answer/opinion or the work is done.
    Don't leave idle AI sessions running — this is part of the workflow, not optional.
 
-Launch commands: `claude --dangerously-skip-permissions` and `codex --yolo`
-(both fully autonomous — no permission prompts during the conversation).
+The canonical permission profiles and launch commands are in `SKILL.md`. The older examples below
+use unrestricted modes and are retained only as history.
 
 ---
 
-## 2. Helper script (recommended)
+## 2. Helper script (historical reference — do not use as the interface)
 
 ```bash
 ./agent-tmux.sh start <session> claude|codex [workdir]  # launch (handles startup screens)
@@ -133,7 +141,7 @@ forever and an unguarded `until` loop becomes a zombie process. (Learned the har
 orphaned wait loops kept spinning long after their session was killed.)
 
 Claude prints a `✻ Worked for Ns`-style line when done; Codex's answer is the last `•` bullet
-above the input box. The helper script implements all of this — prefer it.
+above the input box. This older detection logic is superseded by `SKILL.md`.
 
 ### Read the screen
 

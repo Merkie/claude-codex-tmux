@@ -1,11 +1,14 @@
 # Controlling Claude Code & Codex CLI via tmux (agent-to-agent playbook)
 
+> **SUPERSEDED:** Use [`SKILL.md`](./SKILL.md). This machine-local draft is retained only as
+> historical reference and must not be used as operational instructions.
+
 Verified working on this Mac on 2026-08-09 (tmux 3.7b, Claude Code v2.1.226, Codex v0.146.0).
 Audience: Claude, Codex, or any other agent that can run shell commands. Use this to consult
 the *other* CLI for code review, plan critique, or a second opinion — then close the session.
 
-**Fast path:** use the helper script `~/Desktop/agent-tmux.sh` (section 2). Raw tmux commands
-are in section 3 if you need finer control. Both are proven end-to-end.
+**Historical note:** this draft formerly recommended `~/Desktop/agent-tmux.sh`. Do not use it as
+the interface; use the raw, corrected workflow in `SKILL.md`.
 
 ---
 
@@ -22,7 +25,7 @@ Launch commands: `claude --dangerously-skip-permissions` and `codex --yolo`
 
 ---
 
-## 2. Helper script (recommended)
+## 2. Helper script (historical reference)
 
 ```bash
 ~/Desktop/agent-tmux.sh start <session> claude|codex [workdir]  # launch (handles startup screens)

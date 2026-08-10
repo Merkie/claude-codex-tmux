@@ -1,5 +1,8 @@
 # Follow-up: owner feedback and revised guidance
 
+> **Historical document. [`SKILL.md`](./SKILL.md) is now the single canonical workflow and
+> overrides this file.** The incident and owner feedback below are retained as context.
+
 This doc records feedback from the repo owner (Archer) after the first real use of this
 playbook, and revises the recommended approach accordingly. If you are an agent reading this
 repo: **this doc overrides anything it contradicts in README.md.**

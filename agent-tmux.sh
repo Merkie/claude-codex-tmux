@@ -1,6 +1,7 @@
 #!/bin/bash
 # agent-tmux.sh — drive `claude` / `codex` CLI sessions inside tmux (for agent-to-agent use).
-# Companion doc: README.md (https://github.com/Merkie/claude-codex-tmux)
+# Executable historical reference only. Canonical agent instructions: SKILL.md.
+# Do not use this script as the operational interface.
 #
 # Usage:
 #   agent-tmux.sh start <session> claude|codex [workdir]   # launch CLI in detached tmux session
