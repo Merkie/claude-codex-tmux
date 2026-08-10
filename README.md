@@ -6,8 +6,12 @@ the other — code review, adversarial plan critique, second opinions — then c
 Everything here was verified end-to-end with live sessions (tmux 3.7b, Claude Code v2.1.226,
 Codex CLI v0.146.0, macOS). Audience: Claude, Codex, or any agent that can run shell commands.
 
-**Fast path:** use [`agent-tmux.sh`](./agent-tmux.sh) (section 2). Raw tmux commands are in
-section 3 if you need finer control.
+> **Read [`FOLLOWUP.md`](./FOLLOWUP.md) after this** — owner feedback that revises this guidance
+> and overrides anything it contradicts here. Short version: drive the CLIs with the **raw tmux
+> commands in section 3, run in the foreground with bounded waits** — no background watcher
+> shells, no subagents — and clean up every session and process you start, automatically.
+> [`agent-tmux.sh`](./agent-tmux.sh) (section 2) stays only as an executable reference of the
+> same logic; hand agents the markdown, not the script.
 
 ---
 
