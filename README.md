@@ -19,6 +19,9 @@ Talk to Claude and have it review my PR. Verify its important findings, report a
 and close the tmux session when you are done.
 ```
 
-The workflow uses raw foreground tmux commands, bounded waits, exact session ownership, explicit
-permission profiles, follow-up prompts in the same interactive conversation, and verified cleanup.
+The peer always launches unrestricted — `codex --yolo` or `claude --dangerously-skip-permissions`.
+No sandbox, approval, or plan-mode flags. Scope the peer through the prompt, not through flags.
+
+The workflow uses raw foreground tmux commands, bounded waits, exact session ownership,
+follow-up prompts in the same interactive conversation, and verified cleanup.
 There is no helper shell script and no secondary or legacy playbook in this repository.
