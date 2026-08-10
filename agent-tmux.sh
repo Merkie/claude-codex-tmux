@@ -17,7 +17,18 @@ die() { echo "agent-tmux: $*" >&2; exit 1; }
 [ -n "$CMD" ] && [ -n "$NAME" ] || die "usage: agent-tmux.sh start|ask|read|full|up|down|stop <session> ..."
 
 pane() { tmux capture-pane -p -t "$NAME"; }
-busy() { pane | grep -qi 'esc to interrupt'; }
+# Busy markers differ per CLI:
+#  - Codex (and Claude's default inline TUI) show "esc to interrupt" while working.
+#  - Claude's fullscreen TUI shows a col-0 spinner line like "✶ Prestidigitating… (4s · ↓ 157 tokens)"
+#    and NEVER says "esc to interrupt". The regex below is byte-safe in the C locale (no
+#    [[:alpha:]]-on-multibyte tricks): 1-4 bytes of glyph, space, capitalized word, "…".
+#    Completion lines ("✻ Baked for 9s") have no ellipsis, so they don't match.
+busy() {
+  local SCREEN; SCREEN="$(pane)" || return 1
+  echo "$SCREEN" | grep -qi 'esc to interrupt' && return 0
+  echo "$SCREEN" | grep -qE '^[^ ]{1,4} [[:upper:]][^ ]*…'
+}
+alive() { tmux has-session -t "$NAME" 2>/dev/null; }
 
 case "$CMD" in
 start)
@@ -58,12 +69,18 @@ ask)
   tmux paste-buffer -p -d -t "$NAME"
   sleep 0.4
   tmux send-keys -t "$NAME" Enter
-  # Wait for the busy marker to appear (instant replies may skip it), then disappear.
+  # Wait for the busy marker to appear (instant replies may skip it), then stay gone for
+  # 3 consecutive polls (spinner can blink between tool calls). Bail out if the session
+  # dies — otherwise this loop would spin forever against a dead tmux server.
   SECONDS=0
-  while [ "$SECONDS" -lt 10 ] && ! busy; do sleep 0.3; done
-  while [ "$SECONDS" -lt "$TIMEOUT" ] && busy; do sleep 1; done
+  while [ "$SECONDS" -lt 15 ] && ! busy; do sleep 0.3; done
+  IDLE_POLLS=0
+  while [ "$SECONDS" -lt "$TIMEOUT" ] && [ "$IDLE_POLLS" -lt 3 ]; do
+    alive || die "session '$NAME' died while waiting"
+    if busy; then IDLE_POLLS=0; else IDLE_POLLS=$((IDLE_POLLS + 1)); fi
+    sleep 1
+  done
   busy && die "timed out after ${TIMEOUT}s (agent still working; read with: agent-tmux.sh read $NAME)"
-  sleep 1
   pane | grep -v '^[[:space:]]*$' | tail -40
   ;;
 read)

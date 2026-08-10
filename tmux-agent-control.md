@@ -101,17 +101,33 @@ tmux paste-buffer -p -d -t peer     # -p = bracketed paste → newlines don't au
 sleep 0.4; tmux send-keys -t peer Enter
 ```
 
-### Wait for the reply (works for BOTH CLIs)
+### Wait for the reply (the busy marker differs per CLI!)
 
-Both TUIs show **`esc to interrupt`** on screen while working. Poll for it to appear, then disappear:
+- **Codex** (and Claude's default *inline* TUI) show **`esc to interrupt`** on screen while working.
+- **Claude's fullscreen TUI does NOT.** Its busy indicator is a column-0 spinner line like
+  `✶ Prestidigitating… (4s · ↓ 157 tokens)` — rotating glyph, random verb. Match it byte-safely
+  (works even in the C locale, where `[[:alpha:]]` breaks on multibyte glyphs):
+  `grep -E '^[^ ]{1,4} [[:upper:]][^ ]*…'`. Completion lines (`✻ Baked for 9s`) have no `…`,
+  so they don't match.
+
+Universal busy check covering both CLIs and both Claude TUI modes:
 
 ```bash
-until tmux capture-pane -p -t peer | grep -qi 'esc to interrupt'; do sleep 0.3; done   # started
-until ! tmux capture-pane -p -t peer | grep -qi 'esc to interrupt'; do sleep 1; done   # finished
+busy() {
+  local s; s="$(tmux capture-pane -p -t peer 2>/dev/null)" || return 1
+  echo "$s" | grep -qi 'esc to interrupt' && return 0
+  echo "$s" | grep -qE '^[^ ]{1,4} [[:upper:]][^ ]*…'
+}
 ```
 
-Add a timeout guard for real use (see the script). Claude also prints a `✻ Worked for Ns`-style
-line when done; Codex's answer is the last `•` bullet above the input box.
+Poll for busy to appear (cap the wait — instant replies may skip it), then to stay gone for
+~3 consecutive polls (the spinner can blink off between tool calls). **Always bound the loop
+with a timeout AND a `tmux has-session` check** — if the session dies, `capture-pane` errors
+forever and an unguarded `until` loop becomes a zombie process. (Learned the hard way: three
+orphaned wait loops kept spinning long after their session was killed.)
+
+Claude prints a `✻ Worked for Ns`-style line when done; Codex's answer is the last `•` bullet
+above the input box. The helper script implements all of this — prefer it.
 
 ### Read the screen
 
@@ -167,8 +183,14 @@ both CLIs autosave transcripts — but prefer the slash-command first.
   can submit before the TUI registers the text.
 - **`-l` flag** for prompt text (else words like "Enter"/"Space" get parsed as key names);
   never put `Enter` inside a `-l` call (it would be typed literally).
-- **Completion-detection race**: wait for `esc to interrupt` to APPEAR before waiting for it to
+- **Completion-detection race**: wait for the busy marker to APPEAR before waiting for it to
   disappear, with a short cap on the appear-wait (instant replies may skip it).
+- **Unbounded wait loops become zombies**: after `kill-session` (or a crash), `capture-pane`
+  fails forever, so a bare `until … grep` loop never exits. Always add a timeout and a
+  `tmux has-session` check.
+- **The C locale breaks multibyte grep**: agent shells often run without `LANG` set, so
+  `[[:alpha:]]` and `.` operate on bytes and won't match `✶`/`…` as single characters.
+  Use byte-count patterns (`[^ ]{1,4}`) and literal `…` in the pattern instead.
 - **Codex sometimes ends a turn with no text answer** (turn ends on a tool call). The busy marker
   goes away and nothing is printed. Just ask "So what is the answer?" — the session is fine.
 - **Copy-mode swallows keystrokes**: if a pane is in copy-mode, prompts you type go nowhere.
