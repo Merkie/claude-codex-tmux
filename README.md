@@ -4,6 +4,45 @@ Teach Claude Code, OpenAI Codex CLI, or another shell-capable agent to consult t
 through a controlled, interactive tmux session — for PR review, code review, plan critique,
 adversarial analysis, second opinions, and follow-up discussion.
 
+## Install as an agent skill
+
+The same [`SKILL.md`](./SKILL.md) works unchanged in Claude Code and Codex. It uses the shared
+Agent Skills format and only the portable `name` and `description` frontmatter fields.
+
+Prerequisites: install `tmux`, Claude Code, and Codex CLI, and authenticate both CLIs. Run the
+commands below from the root of this cloned repository.
+
+```bash
+git clone https://github.com/Merkie/claude-codex-tmux.git
+cd claude-codex-tmux
+```
+
+The following personal installation makes the skill available in every project for your user
+account.
+
+For Claude Code:
+
+```bash
+mkdir -p "$HOME/.claude/skills/claude-codex-tmux"
+cp ./SKILL.md "$HOME/.claude/skills/claude-codex-tmux/SKILL.md"
+```
+
+For Codex:
+
+```bash
+mkdir -p "$HOME/.agents/skills/claude-codex-tmux"
+cp ./SKILL.md "$HOME/.agents/skills/claude-codex-tmux/SKILL.md"
+```
+
+Codex normally detects the new skill automatically; restart it if the skill does not appear.
+Claude Code detects changes inside an existing skills directory live, but may need a restart
+when the top-level skills directory was created after the session started.
+
+Invoke it as `/claude-codex-tmux` in Claude Code or `$claude-codex-tmux` in Codex. See the
+[Claude Code skill documentation](https://code.claude.com/docs/en/skills) and
+[OpenAI Codex skill documentation](https://developers.openai.com/codex/skills) for the current
+discovery rules.
+
 ## Canonical instructions
 
 Give the agent [`SKILL.md`](./SKILL.md). It is the complete and only operational playbook.
